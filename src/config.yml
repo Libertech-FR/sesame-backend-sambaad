@@ -1,0 +1,31 @@
+_version: 2
+
+name: 'sambaad'
+description: 'Backend for samba AD'
+active: true
+actions:
+  IDENTITY_PASSWORD_CHANGE:
+    script: "changepwd.py"
+    onError: 'stop'
+  IDENTITY_PASSWORD_RESET:
+    script: "resetpwd.py"
+    onError: 'stop'
+  IDENTITY_CREATE:
+    script: 'upsertidentity.py'
+    onError: 'stop'
+  IDENTITY_UPDATE:
+    script: 'upsertidentity.py'
+    onError: 'stop'
+  IDENTITY_DELETE:
+    script: 'delentity.py'
+    onError: 'stop'
+  IDENTITY_ENABLE:
+    script: 'activation.py --active 1'
+  IDENTITY_DISABLE:
+    script: 'activation.py --active 0'
+  PING_TARGET:
+    script: 'ping.py'
+    onError: 'stop'
+  IDENTITY_LIFECYCLE_CHANGED:
+    script: 'lifecycle.py'
+    onError: 'stop'
