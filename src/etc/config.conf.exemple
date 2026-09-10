@@ -1,0 +1,6 @@
+host=ldap://srvads.mydomain.lan
+user=administrator@mydomain.lan
+password=XXXXXXX
+base=dc=mydomain,dc=lan
+backendFor=etd,adm,esn,ass
+branchAttr=departmentNumber

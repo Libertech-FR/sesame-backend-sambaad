@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: copy sources
+        run: |
+          mkdir -p .debpkg/var/lib/sesame-daemon/backends-modules/sambaad/etc
+          mkdir -p .debpkg/var/lib/sesame-daemon/backends-modules/sambaad/bin
+          mkdir -p .debpkg/var/lib/sesame-daemon/backends-modules/sambaad/lib
+          mkdir -p .debpkg/var/lib/sesame-daemon/backends-modules/sambaad/lifecycle
+          cp src/lifecycle/* .debpkg/var/lib/sesame-daemon/backends-modules/sambaad/lifecycle
+          chmod 700 .debpkg/var/lib/sesame-daemon/backends-modules/sambaad/lifecycle/*
+          cp src/bin/* .debpkg/var/lib/sesame-daemon/backends-modules/sambaad/bin
+          chmod 700 .debpkg/var/lib/sesame-daemon/backends-modules/sambaad/bin/*
+          cp src/lib/* .debpkg/var/lib/sesame-daemon/backends-modules/sambaad/lib
+          cp src/etc/config.conf.exemple .debpkg/var/lib/sesame-daemon/backends-modules/sambaad/etc
+          cp src/config.yml .debpkg/var/lib/sesame-daemon/backends-modules/sambaad
+          cp README.md .debpkg/var/lib/sesame-daemon/backends-modules/sambaad
+          cp install.sh .debpkg/var/lib/sesame-daemon/backends-modules/sambaad
+          chmod 700 .debpkg/var/lib/sesame-daemon/backends-modules/sambaad/install.sh
+      - uses: jiro4989/build-deb-action@v3
+        with:
+           package: sesame-backend-sambaad
+           package_root: .debpkg
+           maintainer: Libertech
+           version: ${{ github.ref }} # refs/tags/v*.*.*
+           arch: 'amd64'
+           depends: 'python3, python3-samba, python-ldb, samba, sesame-daemon'
+           desc: 'sambaAd backend for sesame-daemon'
+           homepage: 'https://github.com/Libertech-FR/sesame-backend-sambaad'
+      - uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: sesame*
+          overwrite: true
+          file_glob: true
