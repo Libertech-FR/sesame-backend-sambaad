@@ -1,21 +1,22 @@
 #!/usr/bin/python3
 import sys
 sys.path.append('../lib')
-import backend_utils as u
 import backend_sambaad_utils as smb
-
-
+import backend_utils as u
+import json
 def main():
-    json=u.readjsoninput()
-    #json=u.readjsonfile('../../unittest/backend_ad_files/identity1.json')
-    config=u.read_config('../etc/config.conf')
+    js=u.readjsoninput()
+    config= u.read_config('../etc/config.conf')
     smb.set_config(config)
-    if u.is_backend_concerned(json):
+    if u.is_backend_concerned(js):
         l=smb.connect_sambaad(u.config('host'),u.config('user'),u.config('password'))
-        print(smb.upsert_entry(l,json))
+        ret=smb.change_entity_password(l,js)
+        result=json.loads(ret)
+        print(ret)
+        exit(result['status'])
     else:
         print(u.returncode(0,'not concerned'))
 
-
 if __name__ == '__main__':
     main()
+
