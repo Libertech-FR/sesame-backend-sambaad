@@ -33,7 +33,7 @@ jobs:
            maintainer: Libertech
            version: ${{ github.ref }} # refs/tags/v*.*.*
            arch: 'amd64'
-           depends: 'python3, python3-samba, python-ldb, samba, sesame-daemon'
+           depends: 'python3, python3-samba, python3-ldb, samba, sesame-daemon'
            desc: 'sambaAd backend for sesame-daemon'
            homepage: 'https://github.com/Libertech-FR/sesame-backend-sambaad'
       - uses: svenstaro/upload-release-action@v2
