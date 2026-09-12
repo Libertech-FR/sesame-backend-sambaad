@@ -26,6 +26,7 @@ jobs:
           cp README.md .debpkg/var/lib/sesame-daemon/backends-modules/sambaad
           cp install.sh .debpkg/var/lib/sesame-daemon/backends-modules/sambaad
           chmod 700 .debpkg/var/lib/sesame-daemon/backends-modules/sambaad/install.sh
+          chmod 755 .debpkg/DEBIAN/postinst
       - uses: jiro4989/build-deb-action@v3
         with:
            package: sesame-backend-sambaad
