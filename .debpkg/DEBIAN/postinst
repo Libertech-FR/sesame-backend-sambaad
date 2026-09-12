@@ -1,0 +1,6 @@
+#!/bin/bash
+echo "disabling samba daemons..."
+systemctl disable samba
+systemctl disable smbd
+systemctl disable nmbd
+systemctl disable winbind
