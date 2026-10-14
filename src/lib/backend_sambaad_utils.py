@@ -165,3 +165,18 @@ def verify_password(user,password):
     except ldb.LdbError as e:
         code, message = e.args
         return (1)
+def is_group_concerned(js):
+    if u.config('groupFamily', '') == '':
+        return True
+    families = [f.strip() for f in u.config('groupFamily').split(',')]
+    return js['payload']['group'].get('family', '') in families
+
+def do_group(samdb,entity):
+    if not is_group_concerned(entity):
+        return u.returncode(0, 'not concerned')
+    #group exist ?
+    query = (f"(group={entity['payload']['group']['cn']})")
+    result = samdb.search(u.config('base'), expression=query, scope=ldb.SCOPE_SUBTREE)
+    if (len(result) == 0):
+        #add group
+
