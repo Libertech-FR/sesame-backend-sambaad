@@ -88,7 +88,12 @@ class sambaBinTest (unittest.TestCase):
         self.assertEqual(result["status"], 0)
         self.assertEqual(result["message"], "Entry deleted")
 
-
+    def test_10create_group(self):
+        ret = self.run_backend('groups.py', './backend_ad_files/group.json')
+        self.assertEqual(ret['returncode'], 0)
+        result = json.loads(ret["stdout"])
+        self.assertEqual(result["status"], 0)
+        self.assertEqual(result["message"], "Entry deleted")
 
 if __name__ == '__main__':
     unittest.main()
