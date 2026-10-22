@@ -3,7 +3,7 @@
   "payload": {
     "group": {
       "_id": "6aca0812c636ce89dc4e2009",
-      "cn": "groupe statiQUE",
+      "cn": "groupeStatiQUE",
       "description": "",
       "mail": "",
       "family": "GENERAL",
@@ -13,7 +13,7 @@
       {
         "_id": "67dd1e9de52d6011720ffe58",
         "cn": "DUPONT Jean",
-        "uid": "jdupont",
+        "uid": "test-toto",
         "mail": "jdupont@test.fr",
         "employeeType": "TAIGA",
         "employeeNumber": "179892"

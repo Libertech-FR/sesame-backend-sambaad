@@ -93,7 +93,17 @@ class sambaBinTest (unittest.TestCase):
         self.assertEqual(ret['returncode'], 0)
         result = json.loads(ret["stdout"])
         self.assertEqual(result["status"], 0)
-        self.assertEqual(result["message"], "Entry deleted")
+        self.assertEqual(result["message"], "OK")
+    def test_11mod_group(self):
+        ret = self.run_backend('upsertidentity.py', './backend_ad_files/identity2.json')
+        self.assertEqual(ret['returncode'], 0)
+        result = json.loads(ret["stdout"])
+        self.assertEqual(result["status"], 0)
+        ret = self.run_backend('groups.py', './backend_ad_files/group1.json')
+        self.assertEqual(ret['returncode'], 0)
+        result = json.loads(ret["stdout"])
+        self.assertEqual(result["status"], 0)
+        self.assertEqual(result["message"], "OK")
 
 if __name__ == '__main__':
     unittest.main()

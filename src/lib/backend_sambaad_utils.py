@@ -31,7 +31,7 @@ def connect_sambaad(url,user,password):
     except ldb.LdbError as e:
         code, message = e.args
         print(u.returncode(1,f"Erreur {code} : {message}"))
-        return(None)
+        exit(1)
 
 
 def upsert_entry(samdb,entity):
@@ -175,8 +175,29 @@ def do_group(samdb,entity):
     if not is_group_concerned(entity):
         return u.returncode(0, 'not concerned')
     #group exist ?
-    query = (f"(group={entity['payload']['group']['cn']})")
-    result = samdb.search(u.config('base'), expression=query, scope=ldb.SCOPE_SUBTREE)
+    query = (f"(&(cn={entity['payload']['group']['cn']})(objectclass=group))")
+    base=u.config('base')
+    result = samdb.search(base, expression=query, scope=ldb.SCOPE_SUBTREE)
     if (len(result) == 0):
         #add group
-
+        try:
+            samdb.newgroup(groupname=entity['payload']['group']['cn'])
+        except ldb.LdbError as e:
+            code, message = e.args
+            return u.returncode(1, "Impossible de creer le groupe")
+    else:
+        for item in result:
+            for member in item.get("member", []):
+                print("Membre :", member)
+    # gestion des utilisateurs dans le groupe
+    members=[]
+    for member in entity['payload']['members']:
+        members.append(member['uid'])
+    try:
+        samdb.add_remove_group_members(entity['payload']['group']['cn'],
+                                   members,
+                                   True)
+    except ldb.LdbError as e:
+        code, message = e.args
+        return u.returncode(1, "Erreur groupe")
+    return u.returncode(0, "OK")
