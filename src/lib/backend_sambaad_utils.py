@@ -171,6 +171,29 @@ def is_group_concerned(js):
     families = [f.strip() for f in u.config('groupFamily').split(',')]
     return js['payload']['group'].get('family', '') in families
 
+def compare(listeSource,listeDestination):
+    # add : valeurs presentes dans la source mais pas dans la destination
+    # del : valeurs presentes dans la destination mais plus dans la source
+    # comparaison insensible a la casse
+    source = list(dict.fromkeys(v.lower() for v in listeSource))
+    destination = list(dict.fromkeys(v.lower() for v in listeDestination))
+    setSource = set(source)
+    setDestination = set(destination)
+    return {
+        'add': [v for v in source if v not in setDestination],
+        'del': [v for v in destination if v not in setSource]
+    }
+
+def getUid(samdb,dn):
+    # renvoie le sAMAccountName correspondant au dn ou None
+    try:
+        res = samdb.search(base=dn, scope=ldb.SCOPE_BASE, attrs=["sAMAccountName"])
+    except ldb.LdbError as e:
+        return (None)
+    if len(res) > 0 and "sAMAccountName" in res[0]:
+        return str(res[0]["sAMAccountName"][0])
+    return (None)
+
 def do_group(samdb,entity):
     if not is_group_concerned(entity):
         return u.returncode(0, 'not concerned')
@@ -178,6 +201,7 @@ def do_group(samdb,entity):
     query = (f"(&(cn={entity['payload']['group']['cn']})(objectclass=group))")
     base=u.config('base')
     result = samdb.search(base, expression=query, scope=ldb.SCOPE_SUBTREE)
+    currentMembers=[]
     if (len(result) == 0):
         #add group
         try:
@@ -188,15 +212,24 @@ def do_group(samdb,entity):
     else:
         for item in result:
             for member in item.get("member", []):
-                print("Membre :", member)
+                # recherche de l'uid
+                uid = getUid(samdb, str(member))
+                if uid is not None:
+                    currentMembers.append(uid)
     # gestion des utilisateurs dans le groupe
     members=[]
     for member in entity['payload']['members']:
         members.append(member['uid'])
+    diff = compare(members, currentMembers)
     try:
-        samdb.add_remove_group_members(entity['payload']['group']['cn'],
-                                   members,
-                                   True)
+        if len(diff['add']) > 0:
+            samdb.add_remove_group_members(entity['payload']['group']['cn'],
+                                       diff['add'],
+                                       True)
+        if len(diff['del']) > 0:
+            samdb.add_remove_group_members(entity['payload']['group']['cn'],
+                                       diff['del'],
+                                       False)
     except ldb.LdbError as e:
         code, message = e.args
         return u.returncode(1, "Erreur groupe")
