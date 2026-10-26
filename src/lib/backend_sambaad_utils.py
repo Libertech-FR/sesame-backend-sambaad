@@ -107,14 +107,14 @@ def activate_entry(samdb,entity,activate):
     try:
         if activate == True:
             samdb.enable_account(query)
-            return(u.returncode(0,'Entry activated'))
+            return(u.returncode(0,'Identity enabled'))
         else:
             samdb.disable_account(query)
-            return(u.returncode(0,'Entry desactivated'))
+            return(u.returncode(0,'Identity disabled'))
     except ldb.LdbError as e:
         code, message = e.args
-        print(u.returncode(1, f"Erreur {code} : {message}"))
-        return (None)
+        return(u.returncode(1, f"Erreur {code} : {message}"))
+
 
 def change_entity_password(samdb,entity):
     if 'oldPassword' in entity['payload'] and 'newPassword' in entity['payload']:
@@ -129,8 +129,8 @@ def change_entity_password(samdb,entity):
                     samdb.setpassword(query, newPassword, True)
                     return u.returncode(0, "Password for " + uid + " changed")
                 except ldb.LdbError as e:
-                    print(u.returncode(1, "Error entity_change_password"))
-                    return (None)
+                    return(u.returncode(1, "Error entity_change_password"))
+
     return(u.returncode(1, "Internal Error Error entity_change_password"))
 
 def reset_entity_password(samdb,entity):
@@ -144,8 +144,7 @@ def reset_entity_password(samdb,entity):
                 return u.returncode(0, "Password for " + uid + " changed")
         except ldb.LdbError as e:
             code, message = e.args
-            print(u.returncode(1, f"Erreur {code} : {message}"))
-        return (None)
+            return(u.returncode(1, f"Erreur {code} : {message}"))
     return u.returncode(1, "Unexpected error")
 
 def generate_password():
@@ -183,6 +182,17 @@ def compare(listeSource,listeDestination):
         'add': [v for v in source if v not in setDestination],
         'del': [v for v in destination if v not in setSource]
     }
+def get_group_members(samdb,name):
+    members=[]
+    query = (f"(&(cn={name})(objectclass=group))")
+    base = u.config('base')
+    result = samdb.search(base, expression=query, scope=ldb.SCOPE_SUBTREE)
+    for item in result:
+        for member in item.get("member", []):
+            # recherche de l'uid
+            uid = getUid(samdb, str(member))
+            members.append(str(uid))
+    return (members)
 
 def getUid(samdb,dn):
     # renvoie le sAMAccountName correspondant au dn ou None
@@ -234,3 +244,21 @@ def do_group(samdb,entity):
         code, message = e.args
         return u.returncode(1, "Erreur groupe")
     return u.returncode(0, "OK")
+
+def del_group(samdb,entity):
+    if not is_group_concerned(entity):
+        return u.returncode(0, 'not concerned')
+    query = (f"(&(cn={entity['payload']['group']['cn']})(objectclass=group))")
+    base=u.config('base')
+    result = samdb.search(base, expression=query, scope=ldb.SCOPE_SUBTREE)
+    if (len(result) == 0):
+        return u.returncode(1, 'group not found')
+    else:
+        dn=result[0].dn
+        try:
+            samdb.delete(dn)
+            return u.returncode(0, "group deleted")
+        except ldb.LdbError as e:
+            code, message = e.args
+            return u.returncode(1, "Erreur groupe")
+

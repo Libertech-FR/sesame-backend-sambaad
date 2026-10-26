@@ -36,5 +36,5 @@ actions:
     script: 'groups.py'
     onError: 'continue'
   GROUP_DELETE:
-    script: 'groups_del.py'
+    script: 'delgroup.py'
     onError: 'continue'

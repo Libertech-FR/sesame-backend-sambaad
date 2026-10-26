@@ -15,11 +15,11 @@ def main():
     if  u.is_backend_concerned(json) == False:
         print(u.returncode(0, "not concerned"))
         exit(0)
-    l=smb.connect_sambaad(u.config('host'),u.config('dn'),u.config('password'))
+    l=smb.connect_sambaad(u.config('host'),u.config('user'),u.config('password'))
     if args.active == "1":
-        ret=l.activate_entry(l,json,True)
+        ret=smb.activate_entry(l,json,True)
     else:
-        ret = l.activate_entry(l, json, False)
+        ret = smb.activate_entry(l, json, False)
     print(ret)
     exit(0)
 

@@ -89,12 +89,22 @@ class sambaBinTest (unittest.TestCase):
         self.assertEqual(result["message"], "Entry deleted")
 
     def test_10create_group(self):
+        ## cezation toto
+        ret = self.run_backend('upsertidentity.py', './backend_ad_files/identity1.json')
+        self.assertEqual(ret['returncode'], 0)
+        result = json.loads(ret["stdout"])
+        self.assertEqual(result["status"], 0)
+        ret = self.run_backend('upsertidentity.py', './backend_ad_files/identity3.json')
+        self.assertEqual(ret['returncode'], 0)
+        result = json.loads(ret["stdout"])
+        self.assertEqual(result["status"], 0)
         ret = self.run_backend('groups.py', './backend_ad_files/group.json')
         self.assertEqual(ret['returncode'], 0)
         result = json.loads(ret["stdout"])
         self.assertEqual(result["status"], 0)
         self.assertEqual(result["message"], "OK")
     def test_11mod_group(self):
+
         ret = self.run_backend('upsertidentity.py', './backend_ad_files/identity2.json')
         self.assertEqual(ret['returncode'], 0)
         result = json.loads(ret["stdout"])
@@ -104,6 +114,28 @@ class sambaBinTest (unittest.TestCase):
         result = json.loads(ret["stdout"])
         self.assertEqual(result["status"], 0)
         self.assertEqual(result["message"], "OK")
-
+    def test_12del_group(self):
+        ret = self.run_backend('delgroup.py', './backend_ad_files/group.json')
+        self.assertEqual(ret['returncode'], 0)
+        result = json.loads(ret["stdout"])
+        self.assertEqual(result["status"], 0)
+    def test_13del_unknowngroup(self):
+        ret = self.run_backend('delgroup.py', './backend_ad_files/group.json')
+        self.assertEqual(ret['returncode'], 0)
+        result = json.loads(ret["stdout"])
+        self.assertEqual(result["status"], 1)
+    def test_99clean_all(self):
+        ret = self.run_backend('delentity.py', './backend_ad_files/identity1.json')
+        self.assertEqual(ret['returncode'], 0)
+        result = json.loads(ret["stdout"])
+        self.assertEqual(result["status"], 0)
+        ret = self.run_backend('delentity.py', './backend_ad_files/identity2.json')
+        self.assertEqual(ret['returncode'], 0)
+        result = json.loads(ret["stdout"])
+        self.assertEqual(result["status"], 0)
+        ret = self.run_backend('delentity.py', './backend_ad_files/identity3.json')
+        self.assertEqual(ret['returncode'], 0)
+        result = json.loads(ret["stdout"])
+        self.assertEqual(result["status"], 0)
 if __name__ == '__main__':
     unittest.main()
